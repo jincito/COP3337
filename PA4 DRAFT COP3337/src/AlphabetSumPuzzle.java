@@ -1,3 +1,8 @@
+//Jin Carballosa
+//COP3337 - SU2024
+//Professor Kianoosh, FIU
+//PA4
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -19,19 +24,8 @@ public class AlphabetSumPuzzle {
             for(int i = 0; i < 256;i++)//initialize digitValues to -1
                 digitValues[i] = -1;//symbol for empty cell!
             findAllVariables(puzzle);//detect every character participating in the puzzle and store it in the list of variables
-            //solve method is called here
 
-            //simlar to solve method, we call this method for DF#8
-            printAllCombinations(digitValues);
-
-
-            //testing numericalValue method...
-            digitValues['T'] = 1;
-            digitValues['H'] = 2;
-            digitValues['E'] = 3;
-            System.out.println("This is an example: Numerical value of " +
-                    "THE is " +
-                    numericalValue("THE", digitValues));
+            solve(digitValues);
         }
     }
 
@@ -89,9 +83,10 @@ public class AlphabetSumPuzzle {
             digitValues[unassignedVariable] = i;
             //2.1. after the assignment, call the method recursively
             printAllCombinations(digitValues);
+            digitValues[unassignedVariable] = -1;
         }
         //3. after step 2, assign the variable to -1 again...
-        digitValues[unassignedVariable] = -1;
+
     }
 
     private static void printCombination(int[] digitValues) {
@@ -101,4 +96,62 @@ public class AlphabetSumPuzzle {
         System.out.println();
     }
 
+    public static void solve(int[] digitValues) {
+        //base case: when none of the puzzle variables are mapped to -1.
+        boolean incompleteAssignment = false;
+        char unassignedVariable = 0;
+        for (char variable: variables) {
+            if (digitValues[variable] == -1) {
+                incompleteAssignment = true;
+                unassignedVariable = variable;
+                break;
+            }
+        }
+        if (!incompleteAssignment) {
+            if (isSolution(digitValues))
+                printCombination(digitValues);
+            return;
+        }
+
+        //recursive step: variables are mapped to -1
+        for (int i = 0; i < 10; i++) {
+            if (isDigitAssigned(digitValues, i))
+                continue;
+            if (i == 0 && isLeadingDigit(unassignedVariable))
+                continue;
+            digitValues[unassignedVariable] = i;
+            solve(digitValues);
+            digitValues[unassignedVariable] = -1;
+        }
+    }
+
+    private static boolean isDigitAssigned(int[] digitValues, int i) {
+        for (char variable: variables) {
+            if (digitValues[variable] == i)
+                return true;
+        }
+        return false;
+    }
+
+    private static boolean isSolution(int[] digitValues) {
+        int sum = 0;
+        for (String operand: operands) {
+            int num = numericalValue(operand, digitValues);
+            if (num == -1) {
+                return false; //unassigned variable: error
+            }
+            sum += num;
+        }
+        int rslt = numericalValue(result, digitValues);
+        return rslt != -1 && sum == rslt;
+    }
+
+    public static boolean isLeadingDigit(char variable) {
+        for (String operand: operands) {
+            if (operand.charAt(0) == variable) {
+                return true;
+            }
+        }
+        return result.charAt(0) == variable;
+    }
 }
