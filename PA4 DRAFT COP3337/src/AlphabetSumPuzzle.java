@@ -15,6 +15,7 @@ public class AlphabetSumPuzzle {
         while(keyboard.hasNextLine()){
             String puzzle = keyboard.nextLine();
             String[] tokens = puzzle.split("[^a-zA-Z]");
+            operands.clear();
 
             for(int i = 0; i < tokens.length-1;i++)
                 if(tokens[i].length() != 0)
@@ -96,41 +97,30 @@ public class AlphabetSumPuzzle {
         System.out.println();
     }
 
-    public static void solve(int[] digitValues) {
-        //base case: when none of the puzzle variables are mapped to -1.
+    private static void solve(int[] digitValues) {
         boolean incompleteAssignment = false;
         char unassignedVariable = 0;
-        for (char variable: variables) {
-            if (digitValues[variable] == -1) {
+        for (char variable : variables)
+            if (digitValues[variable] == -1) {// found an unassigned char
                 incompleteAssignment = true;
                 unassignedVariable = variable;
                 break;
             }
-        }
-        if (!incompleteAssignment) {
+        if (!incompleteAssignment) {// complete assignment
             if (isSolution(digitValues))
                 printCombination(digitValues);
             return;
         }
-
-        //recursive step: variables are mapped to -1
         for (int i = 0; i < 10; i++) {
             if (isDigitAssigned(digitValues, i))
-                continue;
+                continue;// skip if digit is already assigned
+            // Ensure no leading zero
             if (i == 0 && isLeadingDigit(unassignedVariable))
                 continue;
             digitValues[unassignedVariable] = i;
             solve(digitValues);
             digitValues[unassignedVariable] = -1;
         }
-    }
-
-    private static boolean isDigitAssigned(int[] digitValues, int i) {
-        for (char variable: variables) {
-            if (digitValues[variable] == i)
-                return true;
-        }
-        return false;
     }
 
     private static boolean isSolution(int[] digitValues) {
@@ -146,7 +136,15 @@ public class AlphabetSumPuzzle {
         return rslt != -1 && sum == rslt;
     }
 
-    public static boolean isLeadingDigit(char variable) {
+    private static boolean isDigitAssigned(int[] digitValues, int i) { // line 138: Extra Credit
+        for (char variable: variables) {
+            if (digitValues[variable] == i)
+                return true;
+        }
+        return false;
+    }
+
+    private static boolean isLeadingDigit(char variable) { // line 146: Extra Credit
         for (String operand: operands) {
             if (operand.charAt(0) == variable) {
                 return true;
